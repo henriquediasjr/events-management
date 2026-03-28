@@ -48,14 +48,16 @@ class EventController extends Controller
      */
     public function update(Request $request, Event $event)
     {
-        return $event->update([
+        $event->update(
               $request->validate([
                   'name' => 'sometimes|string|max:255',
                   'description' => 'nullable|string',
                   'start_time' => 'sometimes|date',
                   'end_time' => 'sometimes|date|after:start_time',
               ])
-        ]);
+        );
+
+        return $event;
     }
 
     /**
