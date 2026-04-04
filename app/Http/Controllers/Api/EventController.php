@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Resources\EventResource;
+use App\Http\Traits\CanLoadRelationships;
 use App\Models\Event;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
@@ -11,34 +12,20 @@ use Illuminate\Http\Request;
 
 class EventController extends Controller
 {
+    use CanLoadRelationships;
+
+
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        $query = Event::query();
         $relationships = ['user', 'attendees', 'attendees.user'];
+        $query = $this->loadRelationships(Event::query(), $relationships);
 
-        foreach ($relationships as $relationship) {
-            $query->when(
-                $this->shouldReturnRelation($relationship),
-                fn($q) => $q->with($relationship)
-            );
-        }
 
 
         return EventResource::collection($query->latest()->paginate());
-    }
-
-    protected function shouldReturnRelation (string $relation): bool
-    {
-        $include = request()->query('include');
-
-        if (!$include) {
-            return false;
-        }
-        $relations = array_map('trim', explode(',', $include));
-        return in_array($relation, $relations);
     }
 
     /**
