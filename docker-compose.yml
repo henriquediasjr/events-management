@@ -7,9 +7,28 @@ services:
       MYSQL_ROOT_PASSWORD: root
       MYSQL_DATABASE: devdb
     ports:
-      - "3306:3306"
+      - "3307:3306"
     volumes:
       - mysql_data:/var/lib/mysql
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: laravel-app
+    restart: unless-stopped
+    volumes:
+      - ./:/var/www/html
+    depends_on:
+      - mysql
+    environment:
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_DATABASE=devdb
+      - DB_USERNAME=root
+      - DB_PASSWORD=root
+    ports:
+      - "8000:8000"
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
@@ -20,7 +39,7 @@ services:
       PMA_HOST: mysql # Connects to the 'mysql' service defined above
       MYSQL_ROOT_PASSWORD: root
     ports:
-      - "8080:80" # Map container port 80 to host port 8080
+      - "8088:80" # Map container port 80 to host port 8080
     restart: always
 volumes:
   mysql_data:
